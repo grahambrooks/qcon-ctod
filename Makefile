@@ -12,3 +12,4 @@ hello-test	:	test/*.cpp
 clean:
 	rm hello
 	rm hello-test
+
