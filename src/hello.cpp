@@ -1,0 +1,71 @@
+#include <iostream>
+#include "hello.hpp"
+
+#include <OpenCL/opencl.h>
+
+const char *KernelSource = "\n" \
+"__kernel void square(                                                       \n" \
+"   __global float* input,                                              \n" \
+"   __global float* output,                                             \n" \
+"   const unsigned int count)                                           \n" \
+"{                                                                      \n" \
+"   int i = get_global_id(0);                                           \n" \
+"   if(i < count)                                                       \n" \
+"       output[i] = input[i] * input[i];                                \n" \
+"}                                                                      \n" \
+"\n";
+ 
+
+int main(int argc, char** argv) {
+  const size_t DATA_SIZE = 1024;
+
+  auto count = DATA_SIZE;
+
+  std::cout << "Hello World";
+  float input_data[DATA_SIZE];
+  float results[DATA_SIZE];
+  
+  
+  initialise_input_data(input_data, DATA_SIZE);
+
+  cl_device_id device_id;
+  auto err = clGetDeviceIDs(NULL, CL_DEVICE_TYPE_GPU, 1, &device_id, NULL);
+  auto context = clCreateContext(0, 1, &device_id, NULL, NULL, &err);
+  auto commands = clCreateCommandQueue(context, device_id, 0, &err);
+  auto program = clCreateProgramWithSource(context, 1, (const char **) & KernelSource, NULL, &err);
+  err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+  auto kernel = clCreateKernel(program, "square", &err);
+  auto input = clCreateBuffer(context,  CL_MEM_READ_ONLY,  sizeof(float) * count, NULL, NULL);
+  auto output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * count, NULL, NULL);
+
+  err = clEnqueueWriteBuffer(commands, input, CL_TRUE, 0, sizeof(float) * count, input_data, 0, NULL, NULL);
+
+  err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input);
+  err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
+  err |= clSetKernelArg(kernel, 2, sizeof(unsigned int), &count);
+
+  auto local = count;
+  err = clGetKernelWorkGroupInfo(kernel, device_id, CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, NULL);
+
+  auto global = count;
+  err = clEnqueueNDRangeKernel(commands, kernel, 1, NULL, &global, &local, 0, NULL, NULL);
+
+  clFinish(commands);
+  err = clEnqueueReadBuffer( commands, output, CL_TRUE, 0, sizeof(float) * count, results, 0, NULL, NULL );
+  
+  
+  auto correct = check_results(input_data, results, count);
+  
+  printf("Computed '%lu/%lu' correct values!\n", correct, count);
+  
+  clReleaseMemObject(input);
+  clReleaseMemObject(output);
+  clReleaseProgram(program);
+  clReleaseKernel(kernel);
+  clReleaseCommandQueue(commands);
+  clReleaseContext(context);
+
+  return 0;
+}
+
+
