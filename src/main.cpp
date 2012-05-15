@@ -11,11 +11,13 @@ int main(int argc, const char* argv[]) {
     run_program();
   }
 
-  filesystem_scanner scanner;
+  std::cout << "Scanning test " << argc <<  std::endl;
 
-  path_list found;
-
-  if (argc >= 1) {
+  if (argc > 1) {
+    filesystem_scanner scanner;
+    
+    path_list found;
+    
     boost::timer::auto_cpu_timer t;
     path p(argv[1]);
 
@@ -25,4 +27,5 @@ int main(int argc, const char* argv[]) {
   } else {
     std::cout << "Usage " << argv[0] << " [path]" << std::endl;
   }
+  return 0;
 }

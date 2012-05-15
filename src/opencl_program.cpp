@@ -26,7 +26,6 @@ void run_program() {
 
   auto count = DATA_SIZE;
 
-  std::cout << "Hello World";
   float input_data[DATA_SIZE];
   float results[DATA_SIZE];
   
