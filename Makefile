@@ -2,6 +2,9 @@
 all	:	qcdf qcdf-test
 	hello-test
 
+src/program.cpp: src/kernel_program.cl
+	ruby tools/embed_program.rb $< $@
+
 qcdf	:	src/*.cpp
 	clang++ -o qcdf -std=c++11 src/*.cpp -framework opencl /usr/local/lib/libboost_filesystem-mt.dylib /usr/local/lib/libboost_system-mt.dylib /usr/local/lib/libboost_timer-mt.dylib
 

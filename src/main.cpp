@@ -1,10 +1,15 @@
 #include "config.hpp"
 #include <boost/timer/timer.hpp>
 #include "filesystem_scanner.hpp"
-
+#include "opencl_program.hpp"
 
 int main(int argc, const char* argv[]) {
   std::cout << "QCon Duplicatetext finder" << std::endl;
+
+  if (true) {
+    boost::timer::auto_cpu_timer t;
+    run_program();
+  }
 
   filesystem_scanner scanner;
 
