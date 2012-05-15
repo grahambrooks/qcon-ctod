@@ -1,5 +1,4 @@
 
-puts ARGV
 input_path = ARGV[0]
 output_path = ARGV[1]
 
@@ -14,5 +13,5 @@ File.open(output_path, "w") do |output|
       output.puts "\"#{line.strip}\\n\" \\"
     end
   end
-  output.puts "\"\\n\""
+  output.puts "\"\\n\";"
 end

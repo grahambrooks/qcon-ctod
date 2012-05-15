@@ -1,2 +1,2 @@
 
-const char* KernelSource;
+extern const char* KernelSource;

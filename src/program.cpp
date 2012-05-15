@@ -8,4 +8,4 @@ const char *KernelSource = "\n" \
 "if(i < count)\n" \
 "output[i] = input[i] * input[i];\n" \
 "}\n" \
-"\n"
+"\n";
