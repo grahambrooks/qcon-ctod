@@ -19,6 +19,8 @@ bool filesystem_scanner::find_file(const path & dir_path, const string & file_na
 
 
 void filesystem_scanner::find_all(const path& dir_path, path_list& found) {
+  std::cout << "Scanning " << dir_path << std::endl;
+
   if (exists(dir_path)) {
     boost::filesystem::directory_iterator end_itr;
 
@@ -29,6 +31,7 @@ void filesystem_scanner::find_all(const path& dir_path, path_list& found) {
       if (boost::filesystem::is_directory(itr->status()) ) {
 	find_all(itr->path(), found);
       } else {
+	std::cout << "Found " << itr->path() << std::endl;
 	found.insert(found.end(), itr->path());
       }
 

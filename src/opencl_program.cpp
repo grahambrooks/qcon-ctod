@@ -1,6 +1,7 @@
 #include "config.hpp"
-
+#include <array>
 #include <OpenCL/opencl.h>
+#include "opencl_program.hpp"
 #include "program.hpp"
 
 void initialise_input_data(float* data, size_t element_count) {

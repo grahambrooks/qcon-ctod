@@ -6,12 +6,20 @@
 int main(int argc, const char* argv[]) {
   std::cout << "QCon Duplicatetext finder" << std::endl;
 
+  
+  platform_info info;
+  info.print(cout);
+  device_info dinfo;
+  dinfo.print(cout);
+  
+  //  print_platform_info(cout);
+
   if (true) {
     boost::timer::auto_cpu_timer t;
     run_program();
   }
 
-  std::cout << "Scanning test " << argc <<  std::endl;
+  std::cout << std::endl;
 
   if (argc > 1) {
     filesystem_scanner scanner;
