@@ -35,6 +35,10 @@ void run_program() {
 
   cl_device_id device_id;
   auto err = clGetDeviceIDs(NULL, CL_DEVICE_TYPE_GPU, 1, &device_id, NULL);
+  if (err != CL_SUCCESS) {
+    std::cout << "GPU device not available" << std::endl;
+    return;
+  }
   auto context = clCreateContext(0, 1, &device_id, NULL, NULL, &err);
   auto commands = clCreateCommandQueue(context, device_id, 0, &err);
   auto program = clCreateProgramWithSource(context, 1, (const char **) & KernelSource, NULL, &err);
