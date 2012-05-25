@@ -1,4 +1,6 @@
-#include <OpenCL/opencl.h>
+#ifndef DEVICE_INFO_INCLUDED
+#define DEVICE_INFO_INCLUDED
+
 
 class device_info {
 private:
@@ -7,3 +9,5 @@ private:
 public:
   void print(ostream& o);
 };
+
+#endif

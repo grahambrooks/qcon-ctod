@@ -6,8 +6,7 @@
 #include <ostream>
 #include <istream>
 #include <iostream>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem.hpp>
+#include <OpenCL/opencl.h>
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 
@@ -22,10 +21,5 @@ using std::cout;
 typedef std::ostream ostream;
 typedef std::istream istream;
 using std::endl;
-
-typedef boost::filesystem::path path;
-typedef std::list<boost::filesystem::path> path_list;
-using boost::filesystem::directory_iterator;
-using boost::filesystem::is_directory;
 
 #endif

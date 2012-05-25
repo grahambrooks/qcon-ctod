@@ -53,6 +53,10 @@ void app::find_duplicates(const std::list<std::string>& paths) {
   }
   
   std::cout << "Found " << found.size() << " Files" << std::endl;
+
+  // for (auto p  : found) {
+  //   std::cout << p << std::endl;
+  // }
 }
 
 

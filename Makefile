@@ -3,11 +3,7 @@ LT = dylib
 #LT = a
 BOOST_LIBS = \
 	$(BOOST_LIB_PATH)/libboost_system.$(LT) \
-	$(BOOST_LIB_PATH)/libboost_timer.$(LT) \
-	$(BOOST_LIB_PATH)/libboost_program_options.$(LT) \
-	$(BOOST_LIB_PATH)/libboost_filesystem.$(LT)
-
-
+	$(BOOST_LIB_PATH)/libboost_timer.$(LT)
 
 all	:	qcdf qcdf-test
 	hello-test
