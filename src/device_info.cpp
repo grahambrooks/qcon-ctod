@@ -6,16 +6,16 @@ void device_info::print(std::ostream& o) {
   o << "================================================================================" << std::endl;
   o << "OpenCL Device Info" << std::endl;
 
-  cl_platform_id ids[10];
-  cl_uint num_platforms;
+  cl_platform_id ids[10] = {0};
+  cl_uint num_platforms = 0;
   
-  auto rc = clGetPlatformIDs (10, ids, &num_platforms);
+  auto rc = clGetPlatformIDs(10, ids, &num_platforms);
   
   if (rc == CL_INVALID_VALUE) {
     o << "Failed to read platform info error code " << rc << std::endl;
   } else {
     for (auto i = 0; i < num_platforms; i++) {
-      cl_device_id device_ids[100];
+      cl_device_id device_ids[100] = {0};
       cl_uint available_devices = 0;
       cl_int rc = clGetDeviceIDs(ids[i], CL_DEVICE_TYPE_ALL, 100, device_ids, &available_devices);
 
@@ -25,7 +25,6 @@ void device_info::print(std::ostream& o) {
 	  o << "Device ID " << ids[j] << std::endl;
 
 	  cl_device_type device_type;
-	  cl_uint uint_value;
 	  size_t actual_size;
 
 	  cl_int rc = clGetDeviceInfo (device_ids[j], CL_DEVICE_TYPE, sizeof(device_type), &device_type, &actual_size);
@@ -95,7 +94,6 @@ void device_info::print(std::ostream& o) {
 
 
 template<class T> void device_info::print_value(ostream& o, cl_device_id id, cl_device_info info_item, const char* message) {
-    cl_device_type device_type;
     T value;
     size_t actual_size;
     

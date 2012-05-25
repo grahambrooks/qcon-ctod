@@ -1,8 +1,8 @@
 #include "config.hpp"
 
 class filesystem_scanner {
+  typedef std::list<std::string> path_list;
+  void scan_directory(const string& path, path_list& found);
 public:
-  bool find_file(const path & dir_path, const string & file_name, path & path_found);
-  
-  void find_all(const path& dir_path, path_list& found);
+  void find_all(const string& path, std::list<std::string>& found);
 };

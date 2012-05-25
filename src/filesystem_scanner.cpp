@@ -1,41 +1,28 @@
 #include "filesystem_scanner.hpp"
 
-bool filesystem_scanner::find_file(const path & dir_path, const string & file_name, path & path_found) {
-  if (!exists(dir_path))
-    return false;
-  
-  directory_iterator end_itr;
-  
-  for (boost::filesystem::directory_iterator itr( dir_path ); itr != end_itr; ++itr ) {
-    if (boost::filesystem::is_directory(itr->status()) ) {
-      if ( find_file( itr->path(), file_name, path_found ) ) return true;
-      } else if ( itr->path().filename() == file_name ) {
-      path_found = itr->path();
-      return true;
-    }
-  }
-  return false;
+#include <dirent.h>
+
+void filesystem_scanner::find_all(const string& path, path_list& found) {
+  scan_directory(string(path), found);
 }
 
+void filesystem_scanner::scan_directory(const string& dir_name, path_list& found) {
+  struct dirent *fname;
+  
+  DIR *od = opendir(dir_name.c_str());
 
-void filesystem_scanner::find_all(const path& dir_path, path_list& found) {
-  std::cout << "Scanning " << dir_path << std::endl;
-
-  if (exists(dir_path)) {
-    boost::filesystem::directory_iterator end_itr;
-
-    boost::filesystem::directory_iterator itr(dir_path);
-
-    while (itr != end_itr) {
-
-      if (boost::filesystem::is_directory(itr->status()) ) {
-	find_all(itr->path(), found);
-      } else {
-	std::cout << "Found " << itr->path() << std::endl;
-	found.insert(found.end(), itr->path());
+  if (od != NULL) {
+    while((fname = readdir(od)) != NULL) { 
+      if((strcmp(fname->d_name, ".") == 0) || (strcmp(fname->d_name, "..") == 0))
+	continue;
+      
+      if(fname->d_type == DT_DIR) {
+	string p(dir_name);
+	scan_directory(p + "/" + fname->d_name, found);
       }
-
-      itr++;
-    }
+      
+      if(fname->d_type == DT_REG)
+	found.insert(found.end(), fname->d_name);
+    } 
   }
 }
