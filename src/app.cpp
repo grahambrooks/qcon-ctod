@@ -1,8 +1,8 @@
 #include "config.hpp"
-#include <boost/timer/timer.hpp>
 #include "filesystem_scanner.hpp"
 #include "opencl_program.hpp"
 #include "app.hpp"
+#include "task_timer.hpp"
 
 int app::run(int argc, const char* argv[]) {
   std::cout << "QCon Duplicatetext finder" << std::endl;
@@ -34,7 +34,8 @@ int app::run(int argc, const char* argv[]) {
 }
 
 void app::print_platform_info() {
-  boost::timer::auto_cpu_timer t;
+  task_timer timer("Platform information");
+
   platform_info info;
   info.print(cout);
   
@@ -43,7 +44,8 @@ void app::print_platform_info() {
 }
 
 void app::find_duplicates(const std::list<std::string>& paths) {
-  boost::timer::auto_cpu_timer t;
+  task_timer timer("Finding files");
+
   filesystem_scanner scanner;
   
   std::list<std::string> found;

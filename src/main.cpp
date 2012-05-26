@@ -1,5 +1,4 @@
 #include "config.hpp"
-#include <boost/timer/timer.hpp>
 #include "filesystem_scanner.hpp"
 #include "opencl_program.hpp"
 #include <dirent.h>

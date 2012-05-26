@@ -7,8 +7,6 @@
 #include <istream>
 #include <iostream>
 #include <OpenCL/opencl.h>
-#include <boost/foreach.hpp>
-#include <boost/program_options.hpp>
 
 typedef std::string string;
 using std::list;
