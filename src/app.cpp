@@ -3,6 +3,7 @@
 #include "opencl_program.hpp"
 #include "app.hpp"
 #include "task_timer.hpp"
+#include "source_file_reader.hpp"
 
 int app::run(int argc, const char* argv[]) {
   std::cout << "QCon Duplicatetext finder" << std::endl;
@@ -53,12 +54,25 @@ void app::find_duplicates(const std::list<std::string>& paths) {
   for (auto path : paths) {
     scanner.find_all(path, found);
   }
-  
-  std::cout << "Found " << found.size() << " Files" << std::endl;
 
-  // for (auto p  : found) {
-  //   std::cout << p << std::endl;
-  // }
+  SourceTokenizer st;  
+
+  long long bytes = 0;
+  long lines = 0;
+
+  for (auto p  : found) {
+    try {
+    SourceTokens tokens;
+
+    bytes += st.parse_file(p.c_str(), tokens);
+    lines += tokens.size(); 
+
+    } catch (invalid_file_exception ife) {
+      std::cout << p << " - binary" << std::endl;
+    }
+  }
+  std::cout << "Processed " << bytes << " " << lines << " lines" << std::endl;
+  std::cout << "Found " << found.size() << " Files" << std::endl;
 }
 
 

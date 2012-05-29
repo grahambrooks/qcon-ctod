@@ -13,7 +13,7 @@ void filesystem_scanner::scan_directory(const string& dir_name, path_list& found
 
   if (od != NULL) {
     while((fname = readdir(od)) != NULL) { 
-      if((strcmp(fname->d_name, ".") == 0) || (strcmp(fname->d_name, "..") == 0))
+      if((strcmp(fname->d_name, ".") == 0) || (strcmp(fname->d_name, "..") == 0) || (*fname->d_name) == '.')
 	continue;
       
       string full_path = (*(dir_name.end()-1) == '/') ? dir_name + fname->d_name : dir_name + "/" + fname->d_name;

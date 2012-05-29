@@ -18,11 +18,11 @@ all	:	qcdf \
 src/program.cpp: src/kernel_program.cl
 	ruby tools/embed_program.rb $< $@
 
-qcdf	:	src/*.cpp	src/program.cpp
+qcdf	:	src/*.cpp src/*.hpp
 	clang++ -O1 -faddress-sanitizer -o qcdf -std=c++11 -Xclang "-stdlib=libc++" -Xlinker -lc++ src/*.cpp -framework opencl
 #	qcdf .
 
-qcdf-test	:	test/*.cpp
+qcdf-test	:	test/*.cpp src/*.hpp
 	clang++ -I $(GTEST_INCLUDE) -o qcdf-test -std=c++11 test/*.cpp $(GTEST_LIBS)
 	qcdf-test
 
