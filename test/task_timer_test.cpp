@@ -4,11 +4,8 @@
 
 TEST(task_timer, times_tasks) {
   task_timer timer("Testing");
-  printf("This is timed\n");
-  printf("This is timed\n");
-  printf("This is timed\n");
-  printf("This is timed\n");
-  printf("This is timed\n");
-  printf("This is timed\n");
-  printf("This is timed\n");
+
+  sleep(0.1);
+
+  ASSERT_GT(timer.elapsed(), 0); 
 }

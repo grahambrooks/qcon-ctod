@@ -2,68 +2,87 @@
 
 #include <sys/stat.h>
 #include <list>
+
 struct source_line {
   int line_number;
   size_t length;
   char text[];
 };
 
-struct source_file {
-  int line_count;
-  source_line lines[];
+class SourceTokens {
+  std::list<source_line*> lines;
+public:
+  ~SourceTokens() {
+    for (auto token : lines) {
+      free((void*)(token));
+    }
+  }
+  
+  void add(source_line* line) {
+    lines.insert(lines.end(), line);
+  }
+
+  size_t size() {
+    return lines.size();
+  }
 };
 
+
 class SourceTokenizer {
-public:
-  std::list<source_line*> parse(const char*src) {
-    std::list<source_line*> result;
+  long long file_size(const char* path) {
+    struct stat filestatus;
+    stat(__FILE__, &filestatus );
     
-    printf("Allocating first buffer\n");
+    return filestatus.st_size;
+  }
+public:
+  void parse_file(const char* filepath, SourceTokens& tokens) {
+    long long fs = file_size(filepath);
+    
+    char* buffer = (char*) malloc(fs + 1);
+    memset(buffer, 0, fs + 1);
+  
+    FILE* f = fopen(__FILE__, "r");
+    fread(buffer, 1, fs, f);
+    fclose(f);
+
+    parse(buffer, tokens);
+
+    free(buffer);
+  }
+
+  void parse(const char*src, SourceTokens& tokens) {
     source_line* current = (source_line*)malloc(sizeof(source_line) + 2000);
-    result.insert(result.end(), current);
+    tokens.add(current);
+
     current->line_number = 1;
     current->length = 0;
     
-    printf("Processing text\n");
     while (*src != 0) {
       if (*src == '\n') {
 	source_line* next = (source_line*)malloc(sizeof(source_line) + 2000);
 	next->line_number = current->line_number + 1;
 	next->length = 0;
 	current = next;
-	result.insert(result.end(), current);
+	
+	tokens.add(current);
       } else {
 	current->text[current->length++] = *src;
       }
       src++;
     }
-    return result;
   }
 };
 
 
 TEST(source_file_reader, ProcessesInput) {
 
-  struct stat filestatus;
-  stat(__FILE__, &filestatus );
-
-  printf("Reading file %s of size %ld bytes\n", __FILE__, filestatus.st_size); 
-  
-  char* buffer = (char*) malloc(filestatus.st_size+1);
-  memset(buffer, 0, filestatus.st_size+1);
-  
-  FILE* f = fopen(__FILE__, "r");
-  fread(buffer, 1, filestatus.st_size, f);
-  fclose(f);
-
   SourceTokenizer st;
 
-  std::list<source_line*> lines = st.parse(buffer);
+  SourceTokens tokens;
 
-  ASSERT_EQ(1, (*lines.begin())->line_number);
+  st.parse_file(__FILE__, tokens);
 
-  printf("First line %s", (*lines.begin())->text);
-  // ASSERT_GT(0, psf->line_count);
-
-  free(buffer);
+  ASSERT_GT(tokens.size(), __LINE__);
 }
+
