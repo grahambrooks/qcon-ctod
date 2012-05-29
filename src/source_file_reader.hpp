@@ -1,5 +1,12 @@
+#ifndef SOURCE_FILE_READER_INCLUDED
+#define SOURCE_FILE_READER_INCLUDED
+
 #include <sys/stat.h>
 #include <list>
+#include <exception>
+
+class invalid_file_exception : public std::exception {};
+
 
 struct source_line {
   int line_number;
@@ -44,19 +51,24 @@ public:
     fread(buffer, 1, fs, f);
     fclose(f);
 
-    parse(buffer, tokens);
+    parse(buffer, fs, tokens);
 
     free(buffer);
   }
 
-  void parse(const char*src, SourceTokens& tokens) {
+  void parse(const char*src, size_t size, SourceTokens& tokens) {
     source_line* current = (source_line*)malloc(sizeof(source_line) + 2000);
     tokens.add(current);
 
     current->line_number = 1;
     current->length = 0;
     
-    while (*src != 0) {
+    auto end = &src[size];
+
+    while (src != end) {
+      if (*src == 0) {
+	throw invalid_file_exception();
+      }
       if (*src == '\n') {
 	source_line* next = (source_line*)malloc(sizeof(source_line) + 2000);
 	next->line_number = current->line_number + 1;
@@ -71,3 +83,5 @@ public:
     }
   }
 };
+
+#endif
