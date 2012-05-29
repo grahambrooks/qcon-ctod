@@ -60,12 +60,28 @@ class SourceTokenizer {
     sl->size = size;
     return sl;
   }
+
+  bool is_binary(FILE* f) {
+    char test_buffer[1024];
+
+    auto bytes = fread(test_buffer, 1, 1024, f);
+
+    for (auto i = 0; i < bytes; i++) {
+      if (test_buffer[i] == 0)
+	return true;
+    }
+    rewind(f);
+    return false;
+  }
 public:
   size_t parse_file(const char* filepath, SourceTokens& tokens) {
     
     FILE* f = fopen(filepath, "r");
 
     auto fs = file_size(f);
+
+    if (fs > 1000000 && is_binary(f))
+      throw invalid_file_exception();
 
     if (f == NULL) {
       printf("File not found %s\n", filepath);
