@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "../src/source_file_reader.hpp"
 
-TEST(source_file_reader, ProcessesInput) {
+TEST(SourceTokenizer, ProcessesInput) {
 
   SourceTokenizer st;
 
