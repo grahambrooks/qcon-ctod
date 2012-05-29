@@ -18,11 +18,10 @@ TEST(SourceTokenizer, RejectsFilesContainingNull) {
 
   SourceTokens tokens;
 
-  char buffer[1024] = {'a'};
+  char buffer[1024];
 
+  memset(buffer, 'a', 1024);
   buffer[1023] = 0;
-
-  printf("%s", buffer);
 
   ASSERT_THROW(st.parse(buffer, 1024, tokens), invalid_file_exception);
 }
