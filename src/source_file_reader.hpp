@@ -26,14 +26,18 @@ public:
   void add(source_line* line) {
     lines.push_back(line);
   }
-
+  
   void replace_current(source_line* replacement) {
     lines.pop_back();;
     lines.push_back(replacement);
   }
-
+  
   size_t size() {
     return lines.size();
+  }
+  
+  const std::list<source_line*> source_lines() {
+    return lines;
   }
 };
 
@@ -45,7 +49,7 @@ class SourceTokenizer {
     rewind(f);
     return fs;
   }
-
+  
   source_line* alloc_source_line() {
     source_line* sl = (source_line*)malloc(sizeof(source_line) + 2000);
     sl->line_number = 1;
@@ -60,15 +64,15 @@ class SourceTokenizer {
     sl->size = size;
     return sl;
   }
-
+  
   bool is_binary(FILE* f) {
     char test_buffer[1024];
-
+    
     auto bytes = fread(test_buffer, 1, 1024, f);
-
+    
     for (auto i = 0; i < bytes; i++) {
       if (test_buffer[i] == 0)
-	return true;
+        return true;
     }
     rewind(f);
     return false;
@@ -77,67 +81,67 @@ public:
   size_t parse_file(const char* filepath, SourceTokens& tokens) {
     
     FILE* f = fopen(filepath, "r");
-
+    
     auto fs = file_size(f);
-
+    
     if (fs > 1000000 && is_binary(f))
       throw invalid_file_exception();
-
+    
     if (f == NULL) {
       printf("File not found %s\n", filepath);
       return 0;
     }
-
+    
     char* buffer = (char*) malloc(fs + 1);
-  
+    
     auto bytes_read = fread(buffer, 1, fs, f);
     if (bytes_read != fs) {
       printf("Failed to read all the file data\n");
       throw std::exception();
     }
     buffer[fs] = 0;
-
+    
     fclose(f);
-
+    
     parse(buffer, bytes_read, tokens);
-
+    
     free(buffer);
-
+    
     return fs;
   }
-
+  
   void parse(const char*src, size_t size, SourceTokens& tokens) {
     
     source_line* current = alloc_source_line();
     tokens.add(current);
-
+    
     auto end = &src[size];
-
+    
     while (src != end) {
       if (current->length >= current->size) {
-
-	source_line* replacement = alloc_source_line(current->size * 2);
-	replacement->length = current->length;
-	replacement->line_number = current->line_number;
-	memcpy(replacement->text, current->text, current->size);
-
-	tokens.replace_current(replacement);
-	free(current);
-	current = replacement;
+        
+        source_line* replacement = alloc_source_line(current->size * 2);
+        replacement->length = current->length;
+        replacement->line_number = current->line_number;
+        memcpy(replacement->text, current->text, current->size);
+        
+        tokens.replace_current(replacement);
+        free(current);
+        current = replacement;
       }
-
+      
       if (*src == 0) {
-	throw invalid_file_exception();
+        throw invalid_file_exception();
       }
-
+      
       if (*src == '\n') {
-	source_line* next = alloc_source_line();
-	next->line_number = current->line_number + 1;
-
-	current = next;
-	tokens.add(current);
+        source_line* next = alloc_source_line();
+        next->line_number = current->line_number + 1;
+        
+        current = next;
+        tokens.add(current);
       } else {
-	current->text[current->length++] = *src;
+        current->text[current->length++] = *src;
       }
       src++;
     }

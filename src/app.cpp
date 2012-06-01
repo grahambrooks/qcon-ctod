@@ -5,17 +5,19 @@
 #include "task_timer.hpp"
 #include "source_file_reader.hpp"
 
+extern "C" void hash_line(source_line* sl);
+
 int app::run(int argc, const char* argv[]) {
   std::cout << "QCon Duplicatetext finder" << std::endl;
-
+  
   try {
     std::list<std::string> paths;
     
     for (auto i = 1; i < argc; i++) {
       if (argv[i][strlen(argv[i])] != '/') {
-	paths.insert(paths.end(), string(argv[i]) + "/");
+        paths.insert(paths.end(), string(argv[i]) + "/");
       } else {
-	paths.insert(paths.end(), string(argv[i]));
+        paths.insert(paths.end(), string(argv[i]));
       }
     }
     
@@ -36,7 +38,7 @@ int app::run(int argc, const char* argv[]) {
 
 void app::print_platform_info() {
   task_timer timer("Platform information");
-
+  
   platform_info info;
   info.print(cout);
   
@@ -46,7 +48,7 @@ void app::print_platform_info() {
 
 void app::find_duplicates(const std::list<std::string>& paths) {
   task_timer timer("Finding files");
-
+  
   filesystem_scanner scanner;
   
   std::list<std::string> found;
@@ -54,25 +56,31 @@ void app::find_duplicates(const std::list<std::string>& paths) {
   for (auto path : paths) {
     scanner.find_all(path, found);
   }
-
+  
   SourceTokenizer st;  
-
+  
   long long bytes = 0;
   long lines = 0;
-
+  
   for (auto p  : found) {
     try {
-    SourceTokens tokens;
-
-    bytes += st.parse_file(p.c_str(), tokens);
-    lines += tokens.size(); 
-
+      SourceTokens tokens;
+      
+      bytes += st.parse_file(p.c_str(), tokens);
+      lines += tokens.size(); 
+      
+      for (auto token : tokens.source_lines()) {
+        hash_line(token);
+      }
+      
     } catch (invalid_file_exception ife) {
       std::cout << p << " - binary" << std::endl;
     }
   }
   std::cout << "Processed " << bytes << " " << lines << " lines" << std::endl;
   std::cout << "Found " << found.size() << " Files" << std::endl;
+  
+  print_processing_rate(bytes, timer.elapsed());
 }
 
 
