@@ -8,18 +8,35 @@ typedef struct {
   char text[];
 } source_line;
 
-extern "C" void hash_line(source_line* sl);
+extern "C" void hash_line(source_line* sl, source_line* ol);
+extern "C" void hash_driver(source_line* input, source_line* output, const unsigned int count);
 
+  
 TEST(Algorithm, EmptyString) {
   unsigned char expected_digest[] = {0xE4, 0xC2, 0x37, 0x62, 0xED, 0x28, 0x23, 0xA2, 0x7E, 0x62, 0xA6, 0x4B, 0x95, 0xC0, 0x24, 0xE7};
 
   source_line l;
+  source_line ol;
   l.length = 0;
 
-  hash_line(&l);
+  hash_line(&l, &ol);
   
   for (auto i = 0; i < sizeof(expected_digest); i++) {
-    ASSERT_EQ(expected_digest[i], l.digest[i]);
+    ASSERT_EQ(expected_digest[i], ol.digest[i]);
+  }
+}
+
+TEST(Algorithm, DriverEmptyString) {
+  unsigned char expected_digest[] = {0xE4, 0xC2, 0x37, 0x62, 0xED, 0x28, 0x23, 0xA2, 0x7E, 0x62, 0xA6, 0x4B, 0x95, 0xC0, 0x24, 0xE7};
+  
+  source_line l;
+  source_line ol;
+  l.length = 0;
+  
+  hash_driver(&l, &ol, 1);
+  
+  for (auto i = 0; i < sizeof(expected_digest); i++) {
+    ASSERT_EQ(expected_digest[i], ol.digest[i]);
   }
 }
 
@@ -32,11 +49,12 @@ TEST(Algorithm, SingleCharacterString) {
   l->length = 1;
   l->text[0] = 'a';
 
-  hash_line(l);
+  source_line ol;
+  hash_line(l, &ol);
 
 
   for (auto i = 0; i < sizeof(expected_digest); i++) {
-    ASSERT_EQ(expected_digest[i], l->digest[i]);
+    ASSERT_EQ(expected_digest[i], ol.digest[i]);
   }
 
   free(l);
@@ -48,9 +66,10 @@ source_line* hash_string(const char* s) {
   l->length = strlen(s);
   memcpy(l->text, s, l->length);
 
-  hash_line(l);
-
-  return l;
+  source_line * ol = new source_line;
+  hash_line(l, ol);
+  free(l);
+  return ol;
 }
 
 TEST(Algorithm, 3Characters) {

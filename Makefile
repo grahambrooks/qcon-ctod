@@ -19,16 +19,16 @@ src/program.cpp: src/kernel_program.cl
 	ruby tools/embed_program.rb $< $@
 
 qcdf-app	:	src/*.cpp src/*.hpp digest_program.o
-	clang++ -O1 -faddress-sanitizer -o qcdf-app -std=c++11 -Xclang "-stdlib=libc++" -Xlinker -lc++ src/*.cpp -framework opencl digest_program.o
+	clang++ -O1 -faddress-sanitizer -o qcdf-app -std=c++11 -Xclang "-stdlib=libc++" -Xlinker -lc++ src/*.cpp -framework opencl digest_program_standalone.o
 
 digest_program.o: src/digest_program.c
-	clang -c src/digest_program.c
+	clang -c src/digest_program_standalone.c
 
-qcdf-test	:	test/*.cpp src/*.c src/*.hpp digest_program.o
-	clang++ -I $(GTEST_INCLUDE) -o qcdf-test -std=c++11 test/*.cpp digest_program.o $(GTEST_LIBS)
-	qcdf-test
+qcdf-test	:	test/*.cpp src/*.c src/*.hpp digest_program_standalone.o
+	clang++ -I $(GTEST_INCLUDE) -o qcdf-test -std=c++11 test/*.cpp digest_program_standalone.o -framework opencl $(GTEST_LIBS)
+	./qcdf-test
 
 clean:
 	rm -f qcdf-app
 	rm -f qcdf-test
-	rm -f digest_program.o
+	rm -f digest_program_standalone.o

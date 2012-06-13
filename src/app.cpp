@@ -46,6 +46,12 @@ void app::print_platform_info() {
   dinfo.print(cout);
 }
 
+// Satisfy OpenCL dependency on the hashing driver in digest_program.c
+extern "C" long get_global_id(int i) {
+  return 0;
+}
+
+
 void app::find_duplicates(const std::list<std::string>& paths) {
   task_timer timer("Finding files");
   

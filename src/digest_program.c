@@ -12,26 +12,17 @@ typedef struct {
   long length;
   long size;
   unsigned char digest[16];
-  char text[];
+  unsigned char text[];
 } source_line;
 
 
-void MD5Init ();
-void MD5Update ();
-void MD5Final ();
+void MD5Init(__private MD5_CTX *);
+void MD5Update(__private MD5_CTX *, unsigned char *inBuf, unsigned int inLen);
+void MD5Final (__private MD5_CTX *);
 
-static void Transform ();
-
-static unsigned char PADDING[64] = {
-  0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+__kernel void hash_driver(__global source_line*, __global source_line*, const unsigned int);
+void hash_line(source_line*, source_line*);
+void Transform (__private UINT4 *, __private UINT4 *);
 
 #define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
 #define G(x, y, z) (((x) & (z)) | ((y) & (~z)))
@@ -41,108 +32,107 @@ static unsigned char PADDING[64] = {
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
 
 #define FF(a, b, c, d, x, s, ac) \
-  {(a) += F ((b), (c), (d)) + (x) + (UINT4)(ac); \
-   (a) = ROTATE_LEFT ((a), (s)); \
-   (a) += (b); \
-  }
+{(a) += F ((b), (c), (d)) + (x) + (UINT4)(ac); \
+(a) = ROTATE_LEFT ((a), (s)); \
+(a) += (b); \
+}
 #define GG(a, b, c, d, x, s, ac) \
-  {(a) += G ((b), (c), (d)) + (x) + (UINT4)(ac); \
-   (a) = ROTATE_LEFT ((a), (s)); \
-   (a) += (b); \
-  }
+{(a) += G ((b), (c), (d)) + (x) + (UINT4)(ac); \
+(a) = ROTATE_LEFT ((a), (s)); \
+(a) += (b); \
+}
 #define HH(a, b, c, d, x, s, ac) \
-  {(a) += H ((b), (c), (d)) + (x) + (UINT4)(ac); \
-   (a) = ROTATE_LEFT ((a), (s)); \
-   (a) += (b); \
-  }
+{(a) += H ((b), (c), (d)) + (x) + (UINT4)(ac); \
+(a) = ROTATE_LEFT ((a), (s)); \
+(a) += (b); \
+}
 #define II(a, b, c, d, x, s, ac) \
-  {(a) += I ((b), (c), (d)) + (x) + (UINT4)(ac); \
-   (a) = ROTATE_LEFT ((a), (s)); \
-   (a) += (b); \
-  }
+{(a) += I ((b), (c), (d)) + (x) + (UINT4)(ac); \
+(a) = ROTATE_LEFT ((a), (s)); \
+(a) += (b); \
+}
 
-void MD5Init (mdContext)
-MD5_CTX *mdContext;
-{
+void MD5Init(__private MD5_CTX *mdContext) {
   mdContext->i[0] = mdContext->i[1] = (UINT4)0;
-
+  
   mdContext->buf[0] = (UINT4)0x67452301;
   mdContext->buf[1] = (UINT4)0xefcdab89;
   mdContext->buf[2] = (UINT4)0x98badcfe;
   mdContext->buf[3] = (UINT4)0x10325476;
 }
 
-void MD5Update (mdContext, inBuf, inLen)
-MD5_CTX *mdContext;
-unsigned char *inBuf;
-unsigned int inLen;
-{
+void MD5Update(__private MD5_CTX *mdContext, unsigned char *inBuf, unsigned int inLen) {
   UINT4 in[16];
   int mdi;
   unsigned int i, ii;
-
+  
   mdi = (int)((mdContext->i[0] >> 3) & 0x3F);
-
+  
   if ((mdContext->i[0] + ((UINT4)inLen << 3)) < mdContext->i[0])
     mdContext->i[1]++;
   mdContext->i[0] += ((UINT4)inLen << 3);
   mdContext->i[1] += ((UINT4)inLen >> 29);
-
+  
   while (inLen--) {
     mdContext->in[mdi++] = *inBuf++;
-
+    
     if (mdi == 0x40) {
       for (i = 0, ii = 0; i < 16; i++, ii += 4)
         in[i] = (((UINT4)mdContext->in[ii+3]) << 24) |
-                (((UINT4)mdContext->in[ii+2]) << 16) |
-                (((UINT4)mdContext->in[ii+1]) << 8) |
-                ((UINT4)mdContext->in[ii]);
+        (((UINT4)mdContext->in[ii+2]) << 16) |
+        (((UINT4)mdContext->in[ii+1]) << 8) |
+        ((UINT4)mdContext->in[ii]);
       Transform (mdContext->buf, in);
       mdi = 0;
     }
   }
 }
 
-void MD5Final (mdContext)
-MD5_CTX *mdContext;
+void MD5Final(__private MD5_CTX *mdContext)
 {
   UINT4 in[16];
   int mdi;
   unsigned int i, ii;
   unsigned int padLen;
+  unsigned char PADDING[64] = {
+    0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  };
 
+  
   in[14] = mdContext->i[0];
   in[15] = mdContext->i[1];
-
+  
   mdi = (int)((mdContext->i[0] >> 3) & 0x3F);
-
+  
   padLen = (mdi < 56) ? (56 - mdi) : (120 - mdi);
-  MD5Update (mdContext, PADDING, padLen);
-
+  MD5Update(mdContext, PADDING, padLen);
+  
   for (i = 0, ii = 0; i < 14; i++, ii += 4)
     in[i] = (((UINT4)mdContext->in[ii+3]) << 24) |
-            (((UINT4)mdContext->in[ii+2]) << 16) |
-            (((UINT4)mdContext->in[ii+1]) << 8) |
-            ((UINT4)mdContext->in[ii]);
+    (((UINT4)mdContext->in[ii+2]) << 16) |
+    (((UINT4)mdContext->in[ii+1]) << 8) |
+    ((UINT4)mdContext->in[ii]);
   Transform (mdContext->buf, in);
-
+  
   for (i = 0, ii = 0; i < 4; i++, ii += 4) {
     mdContext->digest[ii] = (unsigned char)(mdContext->buf[i] & 0xFF);
-    mdContext->digest[ii+1] =
-      (unsigned char)((mdContext->buf[i] >> 8) & 0xFF);
-    mdContext->digest[ii+2] =
-      (unsigned char)((mdContext->buf[i] >> 16) & 0xFF);
-    mdContext->digest[ii+3] =
-      (unsigned char)((mdContext->buf[i] >> 24) & 0xFF);
+    mdContext->digest[ii+1] = (unsigned char)((mdContext->buf[i] >> 8) & 0xFF);
+    mdContext->digest[ii+2] = (unsigned char)((mdContext->buf[i] >> 16) & 0xFF);
+    mdContext->digest[ii+3] = (unsigned char)((mdContext->buf[i] >> 24) & 0xFF);
   }
 }
 
-static void Transform (buf, in)
-UINT4 *buf;
-UINT4 *in;
+void Transform(__private UINT4 *buf, __private UINT4 *in)
 {
   UINT4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
-
+  
 #define S11 7
 #define S12 12
 #define S13 17
@@ -163,7 +153,7 @@ UINT4 *in;
   FF ( d, a, b, c, in[13], S12, 4254626195); 
   FF ( c, d, a, b, in[14], S13, 2792965006); 
   FF ( b, c, d, a, in[15], S14, 1236535329); 
-
+  
 #define S21 5
 #define S22 9
 #define S23 14
@@ -184,7 +174,7 @@ UINT4 *in;
   GG ( d, a, b, c, in[ 2], S22, 4243563512); 
   GG ( c, d, a, b, in[ 7], S23, 1735328473); 
   GG ( b, c, d, a, in[12], S24, 2368359562); 
-
+  
 #define S31 4
 #define S32 11
 #define S33 16
@@ -205,7 +195,7 @@ UINT4 *in;
   HH ( d, a, b, c, in[12], S32, 3873151461); 
   HH ( c, d, a, b, in[15], S33,  530742520); 
   HH ( b, c, d, a, in[ 2], S34, 3299628645); 
-
+  
 #define S41 6
 #define S42 10
 #define S43 15
@@ -226,20 +216,57 @@ UINT4 *in;
   II ( d, a, b, c, in[11], S42, 3174756917); 
   II ( c, d, a, b, in[ 2], S43,  718787259); 
   II ( b, c, d, a, in[ 9], S44, 3951481745); 
-
+  
   buf[0] += a;
   buf[1] += b;
   buf[2] += c;
   buf[3] += d;
 }
 
-void hash_line(source_line* sl) {
+void hash_line(source_line* sl, source_line* ol) {
+  int i;
   MD5_CTX ctx;
-
+  
   MD5Init(&ctx);
-  MD5Update(&ctx, sl->text, sl->length);
+  MD5Update(&ctx, (unsigned char*)sl->text, sl->length);
   MD5Final(&ctx);
+  
+  ol->line_number = sl->line_number;
+  ol->length = sl->length;
+  
+  for (i = 0; i < 16; i++) {
+    ol->digest[i] = ctx.digest[i];
+  }	
+}
 
-  memcpy(sl->digest, ctx.digest, 16);
+__kernel void hash_driver(
+                          __global source_line* input,
+                          __global source_line* output,
+                          const unsigned int count)
+{
+  size_t i = get_global_id(0);
+  if (i < count) {
+    int j;
+    MD5_CTX ctx;
+    
+    MD5Init(&ctx);
+    int k;
+    for (k = 0; k < input[i].length; k++) {
+      unsigned char c = input[i].text[k];
+      
+      MD5Update(&ctx, &c, 1);
+    }
+    
+    MD5Final(&ctx);
+    
+    output[i].line_number = input[i].line_number;
+    output[i].length = input[i].length;
+    
+    for (j = 0; j < 16; j++) {
+      output[i].digest[j] = ctx.digest[j];
+    }	
+    
+//    hash_line(&input[i], &output[i]);
+  }
 }
 
