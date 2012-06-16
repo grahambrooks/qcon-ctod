@@ -7,12 +7,13 @@
 class invalid_file_exception : public std::exception {};
 
 
-struct source_line {
+typedef struct {
   int line_number;
-  size_t length;
-  size_t size;
+  long length;
+  long size;
+  unsigned char digest[16];
   char text[];
-};
+} source_line;
 
 class SourceTokens {
   std::list<source_line*> lines;

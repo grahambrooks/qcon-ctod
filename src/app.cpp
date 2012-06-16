@@ -5,7 +5,7 @@
 #include "task_timer.hpp"
 #include "source_file_reader.hpp"
 
-extern "C" void hash_line(source_line* sl);
+extern "C" void hash_line(source_line* sl, source_line* ol);
 
 int app::run(int argc, const char* argv[]) {
   std::cout << "QCon Duplicatetext finder" << std::endl;
@@ -76,7 +76,8 @@ void app::find_duplicates(const std::list<std::string>& paths) {
       lines += tokens.size(); 
       
       for (auto token : tokens.source_lines()) {
-        hash_line(token);
+        source_line ol;
+        hash_line(token, &ol);
       }
       
     } catch (invalid_file_exception ife) {
