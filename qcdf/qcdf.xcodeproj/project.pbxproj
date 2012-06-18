@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		427D5ADA158F92CE00DF9ED4 /* multiple_source_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multiple_source_test.cpp; sourceTree = "<group>"; };
 		42D565CF15786D8D00ED27DE /* algorithm_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = algorithm_test.cpp; sourceTree = "<group>"; };
 		42D565D015786D8D00ED27DE /* hash_control_block_builder_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hash_control_block_builder_test.cpp; sourceTree = "<group>"; };
 		42D565D115786D8D00ED27DE /* source_file_reader_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = source_file_reader_test.cpp; sourceTree = "<group>"; };
@@ -54,6 +55,7 @@
 				42D565D215786D8D00ED27DE /* task_timer_test.cpp */,
 				42D565D315786D8D00ED27DE /* test_main.cpp */,
 				42D565D415786DBF00ED27DE /* cl_algorithm_test.cpp */,
+				427D5ADA158F92CE00DF9ED4 /* multiple_source_test.cpp */,
 			);
 			name = test;
 			path = ../test;
